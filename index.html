@@ -1,0 +1,518 @@
+<!--
+ /**
+ * @file Spin Wheel Website - Interactive Web Application
+ * @brief This document establishes the core HTML structure for an engaging "Spin for Rewards"
+ * web application. It seamlessly integrates modern front-end technologies, including
+ * **Tailwind CSS** for utility-first styling and a custom **JavaScript** implementation
+ * for dynamic wheel mechanics, animated reward modals, and celebratory visual effects.
+ * The architecture prioritizes responsiveness across various devices and a smooth,
+ * interactive user experience.
+ *
+ * This component is designed for legal, non-monetary use cases such as:
+ * - **Increasing User Engagement:** Captivating users with interactive elements.
+ * - **Rewarding Users:** Providing non-cash incentives, discounts, or bonus points.
+ * - **Web Development Learning:** Serving as an educational resource for front-end development.
+ * - **Event Promotions:** Ideal for festival sales components, seasonal campaigns,
+ * or interactive giveaways to enhance customer participation and excitement.
+ *
+ * @project ININDIA | Spin Wheel Html Code
+ * @version 1.0.0
+ * @date August 4, 2025
+ * @author ININDIA
+ * @contact support@inindiatech.com | https://www.inindiatech.com
+ * @github https://github.com/inindia
+ * @repository https://github.com/inindia/spin-the-wheel-html-code
+ * @article http://inindiatech.com/next/how-to-create-spin-wheel
+ *
+ * @license MIT License
+ * Copyright (c) 2025 ININDIA CORPORATION.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ * @educational_note
+ * This "Spin Wheel Website" project by **ININDIA CORPORATION** exemplifies our dedication to
+ * **engagement-focused and data-driven development**. As an open-source contribution, it showcases
+ * practical applications of **HTML5 Canvas** for dynamic graphics, **Tailwind CSS** for efficient
+ * responsive design and modern animations, and **vanilla JavaScript** for interactive logic.
+ * We encourage developers to explore this codebase as an educational resource for building engaging
+ * web components. Our commitment to transparent development and open collaboration on GitHub aims
+ * to foster a learning environment and empower the developer community. Contributions, feedback,
+ * and discussions are highly welcomed to continuously enhance this project and further the collective
+ * knowledge in creating robust and user-centric web applications.
+ */
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spin Rewards</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #a7c7ed 0%, #e0c3fc 100%); /* Soft gradient background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow: hidden; /* Prevent scrollbar from confetti */
+        }
+
+        /* Container styling */
+        .container {
+            background-color: #ffffff;
+            border-radius: 2rem; /* More rounded corners */
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25); /* Stronger, more appealing shadow */
+            position: relative;
+            z-index: 1; /* Ensure it's above background elements */
+        }
+
+        /* Canvas styling to ensure it's responsive and centered */
+        canvas {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+            height: auto;
+            border-radius: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* Subtle shadow for canvas */
+            background-color: #ffffff;
+        }
+
+        /* Custom pointer styling (SVG for better control) */
+        .pointer-svg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -100%) translateY(-20px); /* Position above the wheel, slightly offset */
+            width: 50px; /* Slightly larger pointer */
+            height: 50px;
+            z-index: 10;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); /* More pronounced shadow */
+            animation: pointerBounce 1s infinite alternate ease-in-out; /* Pointer animation */
+        }
+
+        @keyframes pointerBounce {
+            0% { transform: translate(-50%, -100%) translateY(-20px); }
+            100% { transform: translate(-50%, -100%) translateY(-15px); }
+        }
+
+        /* Modal specific styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); /* Darker overlay */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: #ffffff;
+            padding: 2.5rem; /* More padding */
+            border-radius: 2rem; /* More rounded */
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3); /* Stronger shadow */
+            text-align: center;
+            max-width: 90%;
+            width: 450px; /* Slightly wider */
+            transform: translateY(-50px) scale(0.9); /* Initial transform for animation */
+            opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.4s ease; /* Bounce effect */
+        }
+
+        .modal-overlay.show .modal-content {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+
+        /* Button styling */
+        .spin-button {
+            background-image: linear-gradient(to right, #6a11cb 0%, #2575fc 100%);
+            transition: all 0.4s ease;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); /* More prominent shadow */
+            position: relative;
+            overflow: hidden; /* For ripple effect */
+        }
+
+        .spin-button:hover {
+            background-position: right center;
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.4);
+            transform: translateY(-3px);
+        }
+
+        .spin-button:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .spin-button:disabled {
+            background-image: none;
+            background-color: #cbd5e1;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* Confetti effect */
+        .confetti-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 999;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f00; /* Default color */
+            border-radius: 50%;
+            opacity: 0;
+            animation: confetti-fall 3s forwards ease-out;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--x), var(--y)) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Responsive adjustments for smaller screens */
+        @media (max-width: 640px) {
+            .container {
+                padding: 1rem;
+            }
+            .modal-content {
+                padding: 1.5rem;
+                width: 95%;
+            }
+            .text-3xl { font-size: 2rem; }
+            .text-4xl { font-size: 2.5rem; }
+            .text-xl { font-size: 1.1rem; }
+            .text-lg { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
+
+    <div class="container relative flex flex-col items-center justify-center bg-white p-6 md:p-8 rounded-3xl shadow-xl max-w-lg w-full">
+        <h1 class="text-3xl md:text-4xl font-extrabold text-gray-800 mb-6 text-center">Spin for Rewards!</h1> <svg class="pointer-svg" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L2 12h5v10h10V12h5L12 2z" fill="#ef4444"/> </svg>
+
+        <canvas id="wheelCanvas" width="400" height="400" class="rounded-3xl border-4 border-blue-500"></canvas>
+
+        <button id="spinButton" class="spin-button mt-8 px-8 py-4 text-xl font-bold text-white rounded-full focus:outline-none focus:ring-4 focus:ring-blue-300">
+            SPIN!
+        </button>
+    </div>
+
+    <div id="rewardModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2 id="modalTitle" class="text-3xl font-bold text-green-600 mb-4">Congratulations!</h2>
+            <p class="text-gray-700 text-lg mb-6">You won: <span id="rewardText" class="font-extrabold text-blue-600"></span></p>
+            <button id="closeModalButton" class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-full hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-colors">
+                OK!
+            </button>
+        </div>
+    </div>
+
+    <div id="confettiContainer" class="confetti-container"></div>
+
+    <script>
+        // Get canvas and button elements
+        const canvas = document.getElementById('wheelCanvas');
+        const ctx = canvas.getContext('2d');
+        const spinButton = document.getElementById('spinButton');
+        const rewardModal = document.getElementById('rewardModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const rewardText = document.getElementById('rewardText');
+        const closeModalButton = document.getElementById('closeModalButton');
+        const confettiContainer = document.getElementById('confettiContainer');
+
+        // Define the prizes for the wheel
+        const prizes = [
+            { text: '10% OFF', color: '#ffadad' },
+            { text: 'Free Shipping', color: '#ffd6a5' },
+            { text: '20% OFF', color: '#fdffb6' },
+            { text: 'Try Again', color: '#caffbf' },
+            { text: '5% OFF', color: '#9bf6ff' },
+            { text: 'Try Again', color: '#a0c4ff' },
+            { text: '30% OFF', color: '#bdb2ff' },
+            { text: 'Bonus Points', color: '#ffc6ff' }
+        ];
+
+        // Wheel properties
+        const numSegments = prizes.length;
+        const arc = Math.PI / (numSegments / 2); // Angle for each segment
+        let spinAngle = 0; // Current rotation angle of the wheel
+        let spinAngleStart = 0; // Starting angle for current spin
+        let finalAngle = 0; // Target angle for the wheel to stop at
+        let spinTime = 0; // Time elapsed during spin
+        let spinTimeTotal = 0; // Total duration of the spin animation
+        let isSpinning = false; // Flag to prevent multiple spins
+
+        // Function to draw the wheel
+        function drawWheel() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = Math.min(centerX, centerY) * 0.9; // Adjust radius to fit within canvas
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas before redrawing
+
+            ctx.save(); // Save current context state
+            ctx.translate(centerX, centerY); // Move origin to center
+            ctx.rotate(spinAngle); // Apply current rotation
+
+            for (let i = 0; i < numSegments; i++) {
+                const angle = i * arc;
+                ctx.beginPath();
+                ctx.arc(0, 0, radius, angle, angle + arc, false);
+                ctx.lineTo(0, 0);
+                ctx.closePath();
+
+                // Fill segment with color
+                ctx.fillStyle = prizes[i].color;
+                ctx.fill();
+
+                // Draw segment border
+                ctx.strokeStyle = '#ffffff'; // White border
+                ctx.lineWidth = 3; // Thicker border
+                ctx.stroke();
+
+                // Draw text for the prize
+                ctx.save(); // Save context before rotating for text
+                ctx.rotate(angle + arc / 2 + Math.PI / 2); // Rotate to center of segment
+                ctx.fillStyle = '#333333'; // Dark text color
+                ctx.font = 'bold 16px Inter, sans-serif'; /* Slightly smaller font for better fit */
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(prizes[i].text, 0, -radius + 40); /* Adjusted text position (further from center) */
+                ctx.restore(); // Restore context after text drawing
+            }
+
+            // Draw the inner circle/hub
+            ctx.beginPath();
+            ctx.arc(0, 0, radius * 0.2, 0, 2 * Math.PI, false); /* Inner circle 20% of main radius */
+            ctx.fillStyle = '#4a90e2'; /* Blue hub color */
+            ctx.fill();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            ctx.restore(); // Restore context after wheel drawing
+        }
+
+        // Easing function for spin animation (cubic ease out)
+        function easeOutCubic(t) {
+            return (--t) * t * t + 1;
+        }
+
+        // Spin animation function
+        function rotateWheel() {
+            spinTime += 30; // Increment time by 30ms (for ~30fps)
+            if (spinTime >= spinTimeTotal) {
+                stopRotateWheel();
+                return;
+            }
+
+            const spinProgress = easeOutCubic(spinTime / spinTimeTotal);
+            // Spin at least 5 full rotations + final angle
+            const newAngle = spinAngleStart + (spinProgress * (2 * Math.PI * 5 + finalAngle));
+            spinAngle = newAngle;
+
+            drawWheel(); // Redraw wheel with new angle
+            requestAnimationFrame(rotateWheel); // Continue animation
+        }
+
+        // Function to stop the wheel and determine the prize
+        function stopRotateWheel() {
+            isSpinning = false;
+            spinButton.disabled = false; // Re-enable spin button
+
+            // Normalize spinAngle to be within 0 to 2*PI
+            const normalizedSpinAngle = (spinAngle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+
+            let winningIndex = -1;
+            // Calculate the angle of the pointer relative to the wheel's content
+            // The pointer is at the top (which is -PI/2 or 3*PI/2 in canvas radians).
+            // We need to find which segment is under this pointer after the wheel has rotated.
+            // The wheel rotates clockwise.
+            // The segments are drawn starting from 0 (right horizontal), going clockwise.
+            // So, segment 0 covers [0, arc), segment 1 covers [arc, 2*arc), etc.
+            // The effective angle of the pointer relative to the wheel's original 0 position
+            // is `(3 * Math.PI / 2) - normalizedSpinAngle`. We normalize this to be positive.
+            const pointerEffectiveAngle = (3 * Math.PI / 2 - normalizedSpinAngle + 2 * Math.PI) % (2 * Math.PI);
+
+            for (let i = 0; i < numSegments; i++) {
+                const startAngle = i * arc;
+                const endAngle = startAngle + arc;
+
+                if (pointerEffectiveAngle >= startAngle && pointerEffectiveAngle < endAngle) {
+                    winningIndex = i;
+                    break;
+                }
+            }
+
+            const winningPrize = prizes[winningIndex];
+            showRewardModal(winningPrize.text);
+            if (winningPrize.text !== 'Try Again') {
+                spawnConfetti(); // Trigger confetti for winning prizes
+            }
+        }
+
+        // Function to handle spin button click
+        function spin() {
+            if (isSpinning) return; // Prevent multiple spins
+
+            isSpinning = true;
+            spinButton.disabled = true; // Disable button during spin
+
+            // Reset spin parameters
+            spinTime = 0;
+            spinTimeTotal = Math.random() * 3000 + 4000; // Spin for 4 to 7 seconds
+
+            // Determine the final angle for a random prize
+            const randomIndex = Math.floor(Math.random() * numSegments);
+            // Calculate the target angle for the chosen segment to align with the pointer.
+            // The center of the target segment is `randomIndex * arc + arc / 2`.
+            // The pointer is at `3*PI/2` (top).
+            // So, the wheel needs to rotate such that `(randomIndex * arc + arc / 2)` aligns with `3*PI/2`.
+            // `finalAngle` is the required rotation from the wheel's initial state to bring the target segment to the pointer.
+            // `finalAngle = (3 * Math.PI / 2) - (randomIndex * arc + arc / 2)`
+            finalAngle = (3 * Math.PI / 2 - (randomIndex * arc + arc / 2) + 2 * Math.PI) % (2 * Math.PI);
+
+            // Store the starting angle for the animation
+            spinAngleStart = spinAngle;
+
+            // Start the animation
+            rotateWheel();
+        }
+
+        // Function to show the reward modal
+        function showRewardModal(prize) {
+            modalTitle.textContent = prize === 'Try Again' ? 'No Luck!' : 'You Won!'; // Shortened modal titles
+            modalTitle.classList.remove('text-green-600', 'text-red-600');
+            modalTitle.classList.add(prize === 'Try Again' ? 'text-red-600' : 'text-green-600');
+
+            rewardText.textContent = prize;
+            rewardModal.classList.remove('hidden');
+            // Add a small delay before showing the content with transition
+            setTimeout(() => {
+                rewardModal.classList.add('show');
+            }, 50);
+        }
+
+        // Function to hide the reward modal
+        function hideRewardModal() {
+            rewardModal.classList.remove('show');
+            // Hide the modal completely after the transition
+            setTimeout(() => {
+                rewardModal.classList.add('hidden');
+                clearConfetti(); // Clear confetti when modal is closed
+            }, 300);
+        }
+
+        // Confetti effect
+        const confettiColors = ['#ffadad', '#ffd6a5', '#fdffb6', '#caffbf', '#9bf6ff', '#a0c4ff', '#bdb2ff', '#ffc6ff'];
+
+        function spawnConfetti() {
+            for (let i = 0; i < 50; i++) { // Spawn 50 pieces of confetti
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                confetti.style.backgroundColor = confettiColors[Math.floor(Math.random() * confettiColors.length)];
+
+                // Random starting position near the center of the screen
+                const startX = window.innerWidth / 2 + (Math.random() - 0.5) * 100;
+                const startY = window.innerHeight / 2 + (Math.random() - 0.5) * 100;
+                confetti.style.left = `${startX}px`;
+                confetti.style.top = `${startY}px`;
+
+                // Random end position
+                const endX = (Math.random() - 0.5) * window.innerWidth * 0.8;
+                const endY = window.innerHeight * (0.5 + Math.random() * 0.5); // Fall downwards
+                confetti.style.setProperty('--x', `${endX}px`);
+                confetti.style.setProperty('--y', `${endY}px`);
+
+                confettiContainer.appendChild(confetti);
+
+                // Remove confetti after animation
+                confetti.addEventListener('animationend', () => {
+                    confetti.remove();
+                });
+            }
+        }
+
+        function clearConfetti() {
+            confettiContainer.innerHTML = ''; // Remove all confetti elements
+        }
+
+
+        // Event Listeners
+        spinButton.addEventListener('click', spin);
+        closeModalButton.addEventListener('click', hideRewardModal);
+
+        // Initial draw of the wheel when the page loads
+        window.onload = function() {
+            drawWheel();
+            // Adjust canvas size on load and resize for responsiveness
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+        };
+
+        // Function to resize canvas based on container width
+        function resizeCanvas() {
+            const container = canvas.closest('.container');
+            if (container) {
+                const containerWidth = container.offsetWidth;
+                // Set canvas width and height to be a bit smaller than container to allow padding/margin
+                const size = Math.min(containerWidth * 0.9, 400); // Max 400px, or 90% of container
+                canvas.width = size;
+                canvas.height = size;
+                drawWheel(); // Redraw wheel after resizing
+            }
+        }
+    </script>
+</body>
+</html>
