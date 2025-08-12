@@ -34,7 +34,7 @@ To get a local copy up and running, follow these simple steps:
 
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/inindia/spin-the-wheel-html-code.git](https://github.com/inindia/spin-the-wheel-html-code.git)
+    git clone https://github.com/inindia/spin-the-wheel-html-code.git
     ```
 2.  **Navigate to the project directory:**
     ```bash
